@@ -8,6 +8,8 @@ import { Modal } from "../Modal/Modal";
 import fetchImages from "../../services/ApiService";
 import smoothScroll from "../../services/SmoothScroll";
 
+import styles from "./ImageGallery.module.css";
+
 class ImageGallery extends React.Component {
   constructor() {
     super();
@@ -53,10 +55,10 @@ class ImageGallery extends React.Component {
       .then(() => smoothScroll());
   };
 
-  openModalHandler = (e) => {
+  openModalHandler = (largeImageURL, alt) => {
     this.setState({
-      largeImageURL: e.target.dataset.source,
-      alt: e.target.alt,
+      largeImageURL: largeImageURL,
+      alt: alt,
     });
   };
 
@@ -69,7 +71,7 @@ class ImageGallery extends React.Component {
 
   render() {
     if (this.state.status === "idle") {
-      return <Button className={"Hidden"} />;
+      return <Button className={styles.hidden} />;
     }
 
     if (this.state.status === "pending") {
@@ -82,8 +84,8 @@ class ImageGallery extends React.Component {
 
     if (this.state.status === "resolved") {
       return (
-        <div className="GalleryContainer">
-          <ul className="ImageGallery">
+        <div className={styles.galleryContainer}>
+          <ul className={styles.imageGallery}>
             {this.state.gallery.map((item) => (
               <ImageGalleryItem
                 key={item.id}
@@ -94,10 +96,10 @@ class ImageGallery extends React.Component {
               />
             ))}
           </ul>
-          <div className="BtnContainer">
+          <div className={styles.btnContainer}>
             <Button
-              className={"Button"}
-              btnName={"Load more"}
+              className={styles.button}
+              btnName="Load more"
               onClick={this.loadMoreHandler}
             />
           </div>

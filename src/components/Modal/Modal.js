@@ -1,5 +1,7 @@
 import React from "react";
 
+import styles from "./Modal.module.css";
+
 class Modal extends React.Component {
   componentDidMount() {
     window.addEventListener("keydown", this.keydownHandler);
@@ -22,8 +24,8 @@ class Modal extends React.Component {
   };
   render() {
     return (
-      <div className="Overlay" onClick={this.onBackdropCloseClick}>
-        <div className="Modal">
+      <div className={styles.overlay} onClick={this.onBackdropCloseClick}>
+        <div className={styles.modal}>
           <img src={this.props.largeImageURL} alt={this.props.alt} />
         </div>
       </div>
