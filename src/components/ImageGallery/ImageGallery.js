@@ -1,10 +1,12 @@
 import React from "react";
+
 import { ImageGalleryItem } from "../ImageGalleryItem/ImageGalleryItem";
 import { Button } from "../Button/Button";
 import { Loader } from "../Loader/Loader";
 import { Modal } from "../Modal/Modal";
 
-const KEY = "22456437-7bc40aa948e36a9aa215a1147";
+import fetchImages from "../../services/ApiService";
+import smoothScroll from "../../services/SmoothScroll";
 
 class ImageGallery extends React.Component {
   constructor() {
@@ -12,25 +14,17 @@ class ImageGallery extends React.Component {
 
     this.state = {
       status: "idle",
-      page: null,
+      page: 1,
       gallery: null,
       // error: null,
     };
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const URL = `https://pixabay.com/api/?q=${this.props.query}&page=1&key=${KEY}&image_type=photo&orientation=horizontal&per_page=12`;
-
     if (prevProps.query !== this.props.query) {
       this.setState({ status: "pending" });
 
-      fetch(URL)
-        .then((response) => {
-          if (response.ok) {
-            return response.json();
-          }
-          return Promise.reject(new Error("Something gone wrong"));
-        })
+      fetchImages(this.props.query)
         .then((gallery) => {
           if (gallery.total === 0) {
             return this.setState({
@@ -40,13 +34,24 @@ class ImageGallery extends React.Component {
           }
           return this.setState({
             gallery: gallery.hits,
-            page: 1,
             status: "resolved",
+            page: 1,
           });
         })
         .catch((error) => this.setState({ error, status: "rejected" }));
     }
   }
+
+  loadMoreHandler = (e) => {
+    fetchImages(this.props.query, this.state.page + 1)
+      .then((gallery) =>
+        this.setState((prevState) => ({
+          gallery: [...prevState.gallery, ...gallery.hits],
+          page: prevState.page + 1,
+        }))
+      )
+      .then(() => smoothScroll());
+  };
 
   openModalHandler = (e) => {
     this.setState({
@@ -60,31 +65,6 @@ class ImageGallery extends React.Component {
       largeImageURL: "",
       alt: "",
     });
-  };
-
-  loadMoreHandler = (e) => {
-    const pageNum = this.state.page + 1;
-    const URL = `https://pixabay.com/api/?q=${this.props.query}&page=${pageNum}&key=${KEY}&image_type=photo&orientation=horizontal&per_page=12`;
-
-    fetch(URL)
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        }
-        return Promise.reject(new Error('"Something gone wrong"'));
-      })
-      .then((gallery) =>
-        this.setState((prevState) => ({
-          gallery: [...prevState.gallery, ...gallery.hits],
-          page: prevState.page + 1,
-        }))
-      )
-      .then(() => {
-        window.scrollTo({
-          top: document.documentElement.scrollHeight,
-          behavior: "smooth",
-        });
-      });
   };
 
   render() {
